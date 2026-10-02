@@ -421,11 +421,11 @@
                     break;
                 case 'ArrowUp':
                     e.preventDefault();
-                    audio.volume = Math.min(1.0, audio.volume + 0.1);
+                    window.scrollBy({ top: -100, behavior: 'smooth' }); // Scroll UP
                     break;
                 case 'ArrowDown':
                     e.preventDefault();
-                    audio.volume = Math.max(0.0, audio.volume - 0.1);
+                    window.scrollBy({ top: 100, behavior: 'smooth' });  // Scroll DOWN
                     break;
                 case ' ':
                     e.preventDefault();
