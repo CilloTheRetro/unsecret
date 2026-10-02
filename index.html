@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un secret - Philippe Grimbert</title>
+    <style>
+        :root {
+            --bg-color: #fdfbf7;
+            --text-color: #2c2c2c;
+            --panel-bg: #ffffff;
+            --panel-border: #e0e0e0;
+            --hover-bg: #f0ede6;
+            --accent-color: #771084;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --panel-bg: #1e1e1e;
+            --panel-border: #333333;
+            --hover-bg: #2a2a2a;
+            --accent-color: #f3c224;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 80px 20px 140px 20px;
+            line-height: 1.85;
+            font-size: 1.15rem;
+        }
+
+        /* Fixed Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--panel-border);
+            box-shadow: 0 2px 8px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 900;
+        }
+
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            font-family: sans-serif;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background-color: var(--hover-bg);
+        }
+
+        /* Table of Contents Drawer */
+        .toc-drawer {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 300px;
+            height: 100%;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--panel-border);
+            box-shadow: 4px 0 12px var(--shadow-color);
+            z-index: 1100;
+            transition: left 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+            font-family: sans-serif;
+        }
+
+        .toc-drawer.open {
+            left: 0;
+        }
+
+        .toc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-item {
+            padding: 12px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .toc-item:hover {
+            background-color: var(--hover-bg);
+            color: var(--accent-color);
+        }
+
+        .toc-time {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Book Content */
+        h1 {
+            text-align: center;
+            font-weight: normal;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        .paragraph {
+            margin-bottom: 16px;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        /* Chapter Start Paragraph Styling */
+        .chapter-heading {
+            text-align: center;
+            font-weight: bold;
+            font-size: 2.0rem;
+            margin-top: 50px;
+            margin-bottom: 25px;
+            color: var(--accent-color);
+            border-top: 1px solid var(--panel-border);
+            padding-top: 35px;
+            line-height: 1.5;
+        }
+
+        /* Fixed Speed Slider Sidebar (Right Side) */
+        .speed-sidebar {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 16px 10px;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 800;
+            font-family: sans-serif;
+            font-size: 0.8rem;
+        }
+
+        .speed-slider {
+            writing-mode: bt-lr; /* IE/Edge */
+            appearance: slider-vertical; /* Webkit */
+            width: 8px;
+            height: 120px;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        #speed-readout {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* Fixed Bottom Audio Player */
+        .player-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--panel-bg);
+            border-top: 1px solid var(--panel-border);
+            padding: 12px 20px;
+            box-shadow: 0 -4px 12px var(--shadow-color);
+            display: flex;
+            justify-content: center;
+            z-index: 900;
+        }
+
+        audio {
+            width: 100%;
+            max-width: 750px;
+            height: 40px;
+        }
+
+        /* Responsive Layout for Small Screens */
+        @media (max-width: 900px) {
+            .speed-sidebar {
+                right: 10px;
+                top: auto;
+                bottom: 80px;
+                transform: none;
+                flex-direction: row;
+                height: auto;
+                padding: 8px 14px;
+                border-radius: 20px;
+            }
+
+            .speed-slider {
+                writing-mode: horizontal-tb;
+                appearance: auto;
+                width: 90px;
+                height: auto;
+            }
+        }
+    </style>
+    <script src="data.js"></script>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <button class="icon-btn" onclick="toggleTOC()" title="Table of Contents">☰</button>
+        <span class="nav-title">Un Secret - English Translation</span>
+        <div class="nav-buttons">
+            <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Table of Contents Slide-Out Drawer -->
+    <div class="overlay" id="overlay" onclick="toggleTOC()"></div>
+    <div class="toc-drawer" id="toc-drawer">
+        <div class="toc-header">
+            <h3 style="margin:0;">Chapters</h3>
+            <button class="icon-btn" onclick="toggleTOC()">✕</button>
+        </div>
+        <ul class="toc-list" id="toc-list">
+            <!-- Populate with your timestamps below -->
+        </ul>
+    </div>
+
+    <!-- Right-side Vertical Speed Control -->
+    <div class="speed-sidebar">
+        <span>Speed</span>
+        <input type="range" class="speed-slider" id="speed-control" min="0.5" max="2.0" step="0.05" value="1.0">
+        <span id="speed-readout">1.0x</span>
+    </div>
+
+    <h1> </h1>
+    <div id="text-container">Loading text...</div>
+
+    <!-- Bottom Audio Control -->
+    <div class="player-container">
+        <audio id="audio-player" controls src="audiobook.mp3"></audio>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audio-player');
+        const container = document.getElementById('text-container');
+        const speedControl = document.getElementById('speed-control');
+        const speedReadout = document.getElementById('speed-readout');
+        const tocDrawer = document.getElementById('toc-drawer');
+        const overlay = document.getElementById('overlay');
+
+        /* ------------------------------------------------------------------
+         * CHAPTER MARKERS
+         * Add your timestamps here (time in seconds).
+         * ------------------------------------------------------------------ */
+        const chapters = [
+            { title: "Chapter 1", time: 13, paragraphId: "p-8" },
+            { title: "Chapter 2", time: 1114, paragraphId: "p-75" },
+            { title: "Chapter 3", time: 2155, paragraphId: "p-139" },
+            { title: "Chapter 4", time: 3512, paragraphId: "p-217" },
+            { title: "Chapter 5", time: 7691, paragraphId: "p-447" }
+            // Add remaining chapters here...
+        ];
+
+        /* 1. Theme Toggle (Light / Dark) */
+        function initTheme() {
+            const savedTheme = localStorage.getItem('reader_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-btn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('reader_theme', newTheme);
+            document.getElementById('theme-btn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        /* 2. Playback Speed Slider */
+        speedControl.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value).toFixed(2);
+            audio.playbackRate = val;
+            speedReadout.textContent = `${parseFloat(val)}x`;
+        });
+
+        /* 3. Render Book Text with Chapter Class Detection */
+        function renderText() {
+            if (typeof transcriptData === 'undefined' || !Array.isArray(transcriptData)) {
+                container.innerHTML = '<p style="color:red; text-align:center;">data.js could not be loaded.</p>';
+                return;
+            }
+
+            // Map out all IDs designated as chapter starts
+            const chapterIds = chapters.map(ch => ch.paragraphId);
+
+            container.innerHTML = '';
+            transcriptData.forEach(item => {
+                const p = document.createElement('p');
+                p.id = item.id;
+                p.className = 'paragraph';
+
+                // Automatically apply chapter heading style if paragraph ID matches
+                if (chapterIds.includes(item.id)) {
+                    p.classList.add('chapter-heading');
+                }
+
+                p.textContent = item.text;
+                container.appendChild(p);
+            });
+        }
+
+        /* 4. Table of Contents & Navigation */
+        function toggleTOC() {
+            tocDrawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function populateTOC() {
+            const tocList = document.getElementById('toc-list');
+            tocList.innerHTML = '';
+
+            chapters.forEach(ch => {
+                const li = document.createElement('li');
+                li.className = 'toc-item';
+                li.innerHTML = `<span>${ch.title}</span><span class="toc-time">${formatTime(ch.time)}</span>`;
+                
+                li.addEventListener('click', () => {
+                    audio.currentTime = ch.time;
+                    audio.play();
+                    
+                    const el = document.getElementById(ch.paragraphId);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    toggleTOC();
+                });
+
+                tocList.appendChild(li);
+            });
+        }
+
+        /* 5. Keyboard Shortcuts */
+        document.addEventListener('keydown', (e) => {
+            if (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) return;
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    audio.currentTime = Math.max(0, audio.currentTime - 10);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    audio.volume = Math.min(1.0, audio.volume + 0.1);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    audio.volume = Math.max(0.0, audio.volume - 0.1);
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (audio.paused) audio.play();
+                    else audio.pause();
+                    break;
+            }
+        });
+
+        // Initialize setup
+        initTheme();
+        renderText();
+        populateTOC();
+    </script>
+</body>
+</html>
